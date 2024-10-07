@@ -23,8 +23,8 @@ router.post("/generate-otp", generateOtp);
 router.post("/forget-password", forgetPassword);
 router.post("/login-admin", loginAdmin);
 
-router.use(authentication);
-router.use(admin);
+// router.use(authentication);
+// router.use(admin);
 router.route("/signup-teacher")
     .post(signupTeacher);
 router.route("/signup-admin")

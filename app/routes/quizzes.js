@@ -11,6 +11,8 @@ const {
 const { admin, teacher, authentication } = require("../middlewares/authentication")
 
 router.use(authentication);
+router.use(admin);
+
 router.route("/")
     .get(getAllQuizzes)
 router.route("/:id")
@@ -23,7 +25,6 @@ router.route("/:id")
 router.route("/add")
     .post(teacher, createQuiz)
 
-// router.use(admin);
 router.route("/")
     .delete(admin, deleteAllQuizzes)
 

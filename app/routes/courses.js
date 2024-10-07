@@ -18,6 +18,8 @@ const {
 const { admin, teacher, authentication } = require("../middlewares/authentication")
 
 router.use(authentication);
+router.use(admin);
+
 router.route("/")
     .get(getAllCourses)
 router.route("/new-courses")
@@ -38,7 +40,6 @@ router.route("/:id")
     .put(teacher, updateCourse)
     .delete(teacher, deleteCourse)
 
-// router.use(admin);
 router.route("/show-hide-course/:id")
     .put(admin, showOrHideCourse)
 router.route("/course-revenue")
