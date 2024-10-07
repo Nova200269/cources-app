@@ -7,7 +7,11 @@ const connectDB = async () => {
   const url = process.env.MONGODB_URI;
   // const url = "mongodb://127.0.0.1:27017/instituteDB"
   mongoose
-    .connect(url)
+    .connect(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000
+    })
     .then(() => console.log("DB connection went successful!"))
     .catch((e) => console.error(e));
   const { connection: db } = mongoose;
