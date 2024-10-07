@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const connectDB = async () => {
-  const url = process.env.MONGODB_URI;
+  const url = "mongodb+srv://bilalrizk:VrTmGxAzRhz22KWj@cluster0.bgyad.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  // const url = process.env.MONGODB_URI;
   // const url = "mongodb://127.0.0.1:27017/instituteDB"
   mongoose
     .connect(url)
