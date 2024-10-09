@@ -29,10 +29,25 @@ function initMiddleware() {
   app.use(express.json({ limit: "150kb" }));
 
   app.use((req, res, next) => {
-    res.header("Access-control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", "*");
     res.header("Cross-Origin-Resource-Policy", "cross-origin");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,PATCH,POST,DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
   });
+
+  // const allowedOrigins = ['https://example.com', 'https://another-allowed-domain.com'];
+  // app.use((req, res, next) => {
+  //   const origin = req.headers.origin;
+  //   if (allowedOrigins.includes(origin)) {
+  //     res.header("Access-Control-Allow-Origin", origin); // Specific origin
+  //     res.header("Access-Control-Allow-Credentials", "true"); // Allow credentials
+  //   }
+  //   res.header("Cross-Origin-Resource-Policy", "same-origin");
+  //   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+  //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  //   next();
+  // });
 
   const limiter = rateLimit({
     limit: 200,
