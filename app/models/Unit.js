@@ -18,6 +18,38 @@ const unitSchema = new mongoose.Schema({
     }]
 }, { collection: "unit", timestamps: true });
 
+unitSchema.pre("findOneAndDelete", async function (next) {
+    try {
+        const id = this.getQuery()._id;
+        const usedInCourse = await Course.exists({ units: id });
+        const usedInCourseProgress = await CourseProgress.exists({ viewedUnits: id });
+        if (usedInCourse || usedInCourseProgress) {
+            const error = new Error(
+                "Cannot delete unit used in a Course or Course progress"
+            );
+            next(error);
+        } else {
+            next();
+        }
+    } catch (err) {
+        next(err);
+    }
+});
+
+unitSchema.pre("save", async function (next) {
+    try {
+        const { Lecture } = require("../models/Lecture");
+        const lectures = this.lectures
+        const validLectures = await Lecture.find({ _id: { $in: lectures } });
+        if (validLectures.length !== lectures.length) {
+            return next(new Error("One or more Lecture IDs are invalid"));
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
 const Unit = mongoose.model('Unit', unitSchema);
 
 function validateCreateUnit(obj) {
@@ -35,24 +67,6 @@ function validateUpdateUnit(obj) {
     });
     return schema.validate(obj);
 }
-
-unitSchema.pre("findByIdAndDelete", async function (next) {
-    try {
-        const id = this.getQuery()._id;
-        const usedInCourse = await Course.exists({ units: id });
-        const usedInCourseProgress = await CourseProgress.exists({ viewedUnits: id });
-        if (usedInCourse || usedInCourseProgress) {
-            const error = new Error(
-                "Cannot delete unit used in a Course or Course progress"
-            );
-            next(error);
-        } else {
-            next();
-        }
-    } catch (err) {
-        next(err);
-    }
-});
 
 module.exports = {
     Unit,

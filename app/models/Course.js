@@ -65,6 +65,64 @@ const courseSchema = new mongoose.Schema({
     }
 }, { collection: "course", timestamps: true });
 
+courseSchema.pre("findOneAndDelete", async function (next) {
+    try {
+        const id = this.getQuery()._id;
+        const usedInCourseProgress = await CourseProgress.exists({ course: id });
+        const usedInPurchasedCourses = await PurchasedCourses.exists({ courseId: id });
+        if (usedInCourseProgress || usedInPurchasedCourses) {
+            const error = new Error(
+                "Cannot delete course used in a Course progress or Purchased courses"
+            );
+            next(error);
+        } else {
+            next();
+        }
+    } catch (err) {
+        next(err);
+    }
+});
+
+courseSchema.pre("save", async function (next) {
+    try {
+        const { Lecture } = require("../models/Lecture");
+        const { Category } = require("../models/Category");
+        const { Unit } = require("../models/Unit");
+        const { Quiz } = require("../models/Quiz");
+        const { Comment } = require("../models/Comment");
+
+        const units = this.units
+        const validUnits = await Unit.find({ _id: { $in: units } });
+        if (validUnits.length !== units.length) {
+            return next(new Error("One or more Unit IDs are invalid"));
+        }
+
+        const quizzes = this.quizzes
+        const validQuizzes = await Quiz.find({ _id: { $in: quizzes } });
+        if (validQuizzes.length !== quizzes.length) {
+            return next(new Error("One or more Quiz IDs are invalid"));
+        }
+
+        const comments = this.comments
+        const validComments = await Comment.find({ _id: { $in: comments } });
+        if (validComments.length !== comments.length) {
+            return next(new Error("One or more Comment IDs are invalid"));
+        }
+
+        const validLecture = await Lecture.findById(this.introVideo);
+        if (!validLecture) {
+            return next(new Error("Invalid intro video ID"));
+        }
+        const validCategory = await Category.findById(this.category);
+        if (!validCategory) {
+            return next(new Error("Invalid Category ID"));
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
 const Course = mongoose.model('Course', courseSchema);
 
 function validateCreateCourse(obj) {
@@ -102,24 +160,6 @@ function validateUpdateCourse(obj) {
     });
     return schema.validate(obj);
 }
-
-courseSchema.pre("findByIdAndDelete", async function (next) {
-    try {
-        const id = this.getQuery()._id;
-        const usedInCourseProgress = await CourseProgress.exists({ course: id });
-        const usedInPurchasedCourses = await PurchasedCourses.exists({ courseId: id });
-        if (usedInCourseProgress || usedInPurchasedCourses) {
-            const error = new Error(
-                "Cannot delete course used in a Course progress or Purchased courses"
-            );
-            next(error);
-        } else {
-            next();
-        }
-    } catch (err) {
-        next(err);
-    }
-});
 
 module.exports = {
     Course,

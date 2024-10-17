@@ -43,6 +43,24 @@ function validateUpdatePurchasedCourse(obj) {
     return schema.validate(obj);
 }
 
+purchasedCourseSchema.pre("save", async function (next) {
+    try {
+        const { User } = require("../models/User");
+        const { Course } = require("../models/Course");
+        const validUser = await User.findById(this.userId);
+        if (!validUser) {
+            return next(new Error("Invalid user ID"));
+        }
+        const validCourse = await Course.findById(this.courseId);
+        if (!validCourse) {
+            return next(new Error("Invalid Course ID"));
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
 const PurchasedCourse = mongoose.model('PurchasedCourse', purchasedCourseSchema);
 
 module.exports = {

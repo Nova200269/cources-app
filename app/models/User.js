@@ -92,6 +92,7 @@ function validateRegisterStudent(obj) {
             .messages({
                 'string.pattern.base': 'Password must have at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
             }),
+        image: joi.string().required(),
         otp: joi.string().required()
     });
     return schema.validate(obj);

@@ -80,6 +80,7 @@ const signupStudent = asyncHandler(async (req, res) => {
         name: req.body.name,
         email: req.body.email,
         password: hashedPassword,
+        image: req.body.image,
     });
     const token = user.generateAuthToken();
     const result = await user.save();

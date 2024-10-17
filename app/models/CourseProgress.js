@@ -31,6 +31,39 @@ const courseProgressSchema = new mongoose.Schema({
     }
 }, { collection: "course_progress", timestamps: true });
 
+courseProgressSchema.pre("save", async function (next) {
+    try {
+        const { User } = require("../models/User");
+        const { Course } = require("../models/Course");
+        const { Unit } = require("../models/Unit");
+        const { Quiz } = require("../models/Quiz");
+
+        const viewedUnits = this.viewedUnits
+        const validViewedUnits = await Unit.find({ _id: { $in: viewedUnits } });
+        if (validViewedUnits.length !== viewedUnits.length) {
+            return next(new Error("One or more Unit IDs are invalid"));
+        }
+
+        const completedQuizzes = this.completedQuizzes
+        const validCompletedQuizzes = await Quiz.find({ _id: { $in: completedQuizzes } });
+        if (validCompletedQuizzes.length !== completedQuizzes.length) {
+            return next(new Error("One or more Quiz IDs are invalid"));
+        }
+
+        const validUser = await User.findById(this.student);
+        if (!validUser) {
+            return next(new Error("Invalid student ID"));
+        }
+        const validCourse = await Course.findById(this.course);
+        if (!validCourse) {
+            return next(new Error("Invalid Course ID"));
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
 const CourseProgress = mongoose.model('CourseProgress', courseProgressSchema);
 
 function validateCreateCourseProgress(obj) {
@@ -54,7 +87,6 @@ function validateUpdateCourseProgress(obj) {
     });
     return schema.validate(obj);
 }
-
 
 module.exports = {
     CourseProgress,

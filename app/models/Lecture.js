@@ -19,6 +19,24 @@ const lectureSchema = new mongoose.Schema({
     },
 }, { collection: "lecture", timestamps: true });
 
+lectureSchema.pre("findOneAndDelete", async function (next) {
+    try {
+        const id = this.getQuery()._id;
+        const usedInCourse = await Course.exists({ introVideo: id });
+        const usedInUnit = await Unit.exists({ lectures: id });
+        if (usedInCourse || usedInUnit) {
+            const error = new Error(
+                "Cannot delete lecture used in a Course or Unit"
+            );
+            next(error);
+        } else {
+            next();
+        }
+    } catch (err) {
+        next(err);
+    }
+});
+
 const Lecture = mongoose.model('Lecture', lectureSchema);
 
 function validateCreateLecture(obj) {
@@ -38,24 +56,6 @@ function validateUpdateLecture(obj) {
     });
     return schema.validate(obj);
 }
-
-lectureSchema.pre("findByIdAndDelete", async function (next) {
-    try {
-        const id = this.getQuery()._id;
-        const usedInCourse = await Course.exists({ introVideo: id });
-        const usedInUnit = await Unit.exists({ lectures: id });
-        if (usedInCourse || usedInUnit) {
-            const error = new Error(
-                "Cannot delete lecture used in a Course or Unit"
-            );
-            next(error);
-        } else {
-            next();
-        }
-    } catch (err) {
-        next(err);
-    }
-});
 
 module.exports = {
     Lecture,

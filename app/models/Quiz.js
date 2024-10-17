@@ -18,10 +18,7 @@ const quizSchema = new mongoose.Schema({
     }]
 }, { collection: "quiz", timestamps: true });
 
-const Quiz = mongoose.model('Quiz', quizSchema);
-
-
-quizSchema.pre("findByIdAndDelete", async function (next) {
+quizSchema.pre("findOneAndDelete", async function (next) {
     try {
         const id = this.getQuery()._id;
         const usedInCourse = await Course.exists({ quizzes: id });
@@ -38,6 +35,22 @@ quizSchema.pre("findByIdAndDelete", async function (next) {
         next(err);
     }
 });
+
+quizSchema.pre("save", async function (next) {
+    try {
+        const { Question } = require("../models/Question");
+        const questions = this.questions
+        const validQuestions = await Question.find({ _id: { $in: questions } });
+        if (validQuestions.length !== questions.length) {
+            return next(new Error("One or more Question IDs are invalid"));
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
+const Quiz = mongoose.model('Quiz', quizSchema);
 
 function validateCreateQuiz(obj) {
     const schema = joi.object({

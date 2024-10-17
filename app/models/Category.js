@@ -29,9 +29,7 @@ function validateUpdateCategory(obj) {
     return schema.validate(obj);
 }
 
-const Category = mongoose.model('Category', categorySchema);
-
-categorySchema.pre("findByIdAndDelete", async function (next) {
+categorySchema.pre("findOneAndDelete", async function (next) {
     try {
         const id = this.getQuery()._id;
         const usedInCategory = await Course.exists({ category: id });
@@ -47,6 +45,8 @@ categorySchema.pre("findByIdAndDelete", async function (next) {
         next(err);
     }
 });
+
+const Category = mongoose.model('Category', categorySchema);
 
 module.exports = {
     Category,

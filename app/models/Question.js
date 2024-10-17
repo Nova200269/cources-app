@@ -18,6 +18,23 @@ const questionSchema = new mongoose.Schema({
     },
 }, { collection: "question", timestamps: true });
 
+questionSchema.pre("findOneAndDelete", async function (next) {
+    try {
+        const id = this.getQuery()._id;
+        const usedInQuiz = await Quiz.exists({ questions: id });
+        if (usedInQuiz) {
+            const error = new Error(
+                "Cannot delete question used in a Quiz"
+            );
+            next(error);
+        } else {
+            next();
+        }
+    } catch (err) {
+        next(err);
+    }
+});
+
 const Question = mongoose.model('Question', questionSchema);
 
 function validateCreateQuestion(obj) {
@@ -37,23 +54,6 @@ function validateUpdateQuestion(obj) {
     });
     return schema.validate(obj);
 }
-
-questionSchema.pre("findByIdAndDelete", async function (next) {
-    try {
-        const id = this.getQuery()._id;
-        const usedInQuiz = await Quiz.exists({ questions: id });
-        if (usedInQuiz) {
-            const error = new Error(
-                "Cannot delete question used in a Quiz"
-            );
-            next(error);
-        } else {
-            next();
-        }
-    } catch (err) {
-        next(err);
-    }
-});
 
 module.exports = {
     Question,
