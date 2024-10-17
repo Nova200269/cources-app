@@ -55,7 +55,7 @@ const courseSchema = new mongoose.Schema({
     },
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comments',
+        ref: 'Comment',
         select: false
     }],
     category: {

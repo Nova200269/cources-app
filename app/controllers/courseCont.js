@@ -113,17 +113,16 @@ const getAllPurchasedCourses = asyncHandler(
 
 const getCourseById = asyncHandler(
     async (req, res) => {
-        const { courseId } = req.params;
         const userId = req.user._id;
         let userLang = req.query.lang || 'en';
         const islang = await Language.find({ code: userLang })
         if (!islang) userLang = 'en'
-        const hasPurchased = await PurchasedCourse.findOne({ userId, courseId });
+        const hasPurchased = await PurchasedCourse.findOne({ userId, _id: req.params.id });
         if (!hasPurchased || req.user.role !== "admin") {
-            const course = await Course.findById(courseId)
-            .populate('introVideo')
-            .populate('comments')
-            .populate('category')
+            const course = await Course.findById(req.params.id)
+                .populate('introVideo')
+                .populate('comments')
+                .populate('category')
             if (!course || course.hidden) {
                 return res.status(404).json({
                     status: 'error',
@@ -251,8 +250,7 @@ const updateCourse = asyncHandler(
 
 const deleteCourse = asyncHandler(
     async (req, res) => {
-        const { id } = req.params;
-        const course = await Course.findByIdAndDelete(id)
+        const course = await Course.findByIdAndDelete(req.params.id)
         if (course) {
             res.status(200).json({
                 status: 'success',
@@ -274,8 +272,8 @@ const deleteAllCourses = asyncHandler(async (req, res) => {
 const showOrHideCourse = asyncHandler(async (req, res) => {
     const course = await Course.findById(req.params.id)
     if (course) {
-        const hide = req.query.hide
-        const text = hide === true ? "hidden" : "visible"
+        const hide = req.query.hide === 'true';
+        const text = hide ? "hidden" : "visible";
         course.hidden = hide
         await course.save()
         res.status(200).json({
@@ -292,10 +290,12 @@ const showOrHideCourse = asyncHandler(async (req, res) => {
 
 const searchCourse = asyncHandler(async (req, res) => {
     const name = req.query.name;
-    if (!name) return res.status(400).json({
-        status: 'error',
-        message: 'Search query is required'
-    });
+    if (!name) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Search query is required'
+        });
+    }
     const regex = new RegExp(name, 'i');
     const courses = await Course.find({
         $or: [
@@ -303,26 +303,26 @@ const searchCourse = asyncHandler(async (req, res) => {
             { 'teacherName.value': { $regex: regex } }
         ]
     }).populate('introVideo');
-    if (courses > 0) {
+    if (courses.length > 0) {
         return res.status(200).json({
             status: 'success',
+            count: courses.length,
             result: courses
         });
     } else {
-        return res.status(400).json({
+        return res.status(404).json({
             status: 'error',
-            message: "no course was found"
+            message: "No course found"
         });
     }
 });
 
 const getCourseRevenue = asyncHandler(async (req, res) => {
-    const { courseId } = req.params.id
-    if (!courseId) return res.status(400).json({
+    if (!req.params.id) return res.status(400).json({
         status: 'error',
         message: "Course id is required"
     });
-    const purchases = await PurchasedCourse.find({ course: courseId });
+    const purchases = await PurchasedCourse.find({ course: req.params.id });
     const totalRevenue = purchases.reduce((sum, purchase) => sum + purchase.price, 0);
     const totalPurchases = purchases.length;
     const result = { totalRevenue: totalRevenue, totalPurchases: totalPurchases }

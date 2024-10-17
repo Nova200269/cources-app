@@ -1,5 +1,5 @@
-const express = require("express")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 const {
     getAllCourses,
     getAllPurchasedCourses,
@@ -14,39 +14,35 @@ const {
     getAllCoursesRevenue,
     newCourses,
     popularCourses
-} = require("../controllers/courseCont")
-const { admin, teacher, authentication } = require("../middlewares/authentication")
+} = require("../controllers/courseCont");
+const { admin, teacher, authentication } = require("../middlewares/authentication");
 
 router.use(authentication);
 router.use(admin);
 
-router.route("/")
-    .get(getAllCourses)
+router.route("/search")
+    .get(searchCourse);
+router.route("/show-hide-course/:id")
+    .put(showOrHideCourse);
+router.route("/course-revenue/:id")
+    .get(getCourseRevenue);
+router.route("/all-courses-revenue")
+    .get(getAllCoursesRevenue);
+router.route("/add")
+    .post(createCourse);
 router.route("/new-courses")
-    .get(newCourses)
+    .get(newCourses);
 router.route("/popular-courses")
-    .get(popularCourses)
-router.route("/purchasedcourses")
-    .get(getAllPurchasedCourses)
+    .get(popularCourses);
+router.route("/purchased-courses")
+    .get(getAllPurchasedCourses);
+
 router.route("/:id")
     .get(getCourseById)
-router.route("/search/:id")
-    .get(searchCourse)
-
-// router.use(teacher);
-router.route("/add")
-    .post(teacher, createCourse)
-router.route("/:id")
-    .put(teacher, updateCourse)
-    .delete(teacher, deleteCourse)
-
-router.route("/show-hide-course/:id")
-    .put(admin, showOrHideCourse)
-router.route("/course-revenue")
-    .get(admin, getCourseRevenue)
-router.route("/all-courses-revenue")
-    .get(admin, getAllCoursesRevenue)
+    .put(updateCourse)
+    .delete(deleteCourse);
 router.route("/")
-    .delete(admin, deleteAllCourses)
+    .get(getAllCourses)
+    .delete(deleteAllCourses);
 
-module.exports = router
+module.exports = router;

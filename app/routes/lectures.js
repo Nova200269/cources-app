@@ -20,11 +20,12 @@ router.route("/:id")
 
 // router.use(teacher);
 router.route("/:id")
-    .put(teacher, updateLecture)
-    .delete(teacher, deleteLecture)
+    .put(updateLecture)
+    .delete(deleteLecture)
 router.route("/add")
-    .post(teacher, createLecture)
+    .post(createLecture)
 
 router.route("/")
-    .delete(admin, deleteAllLectures)
+    .delete(deleteAllLectures)
+    
 module.exports = router
