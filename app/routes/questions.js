@@ -13,19 +13,17 @@ const { admin, teacher, authentication } = require("../middlewares/authenticatio
 router.use(authentication);
 router.use(admin);
 
-router.route("/")
-    .get(getAllQuestions)
-router.route("/:id")
-    .get(getQuestionById)
-
 // router.use(teacher);
 router.route("/:id")
+    .get(getQuestionById)
     .put(updateQuestion)
     .delete(deleteQuestion)
+
 router.route("/add")
     .post(createQuestion)
-
+    
 router.route("/")
+    .get(getAllQuestions)
     .delete(deleteAllQuestions)
 
 module.exports = router

@@ -11,18 +11,18 @@ const {
 const { admin, authentication } = require("../middlewares/authentication")
 
 router.use(authentication);
-router.route("/")
-    .get(getAllAdds)
+router.use(admin);
+
 router.route("/:id")
     .get(getAddById)
-
-router.use(admin);
-router.route("/")
-    .delete(deleteAllAdds)
-router.route("/:id")
     .put(updateAdd)
     .delete(deleteAdd)
+
 router.route("/add")
     .post(createAdd)
+    
+router.route("/")
+    .get(getAllAdds)
+    .delete(deleteAllAdds)
 
 module.exports = router

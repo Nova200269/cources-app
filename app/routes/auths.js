@@ -15,7 +15,7 @@ const {
     lastMounthStudents,
     lastYearStudents
 } = require("../controllers/authCont");
-const { authentication, admin } = require("../middlewares/authentication")
+const { authentication, admin, teacher } = require("../middlewares/authentication")
 
 router.post("/signup", signupStudent);
 router.post("/login", loginUser);
@@ -23,8 +23,9 @@ router.post("/generate-otp", generateOtp);
 router.post("/forget-password", forgetPassword);
 router.post("/login-admin", loginAdmin);
 
-// router.use(authentication);
-// router.use(admin);
+router.use(authentication);
+router.use(admin);
+
 router.route("/signup-teacher")
     .post(signupTeacher);
 router.route("/signup-admin")
@@ -38,7 +39,8 @@ router.route("/delete-user/:id")
 router.route("/delete-user-token/:id")
     .delete(deleteUserToken)
 router.route("/last-mounth-students")
-    .get(lastMounthStudents);
+    .get(teacher, lastMounthStudents);
 router.route("/last-year-students")
-    .get(lastYearStudents);
+    .get(teacher, lastYearStudents);
+
 module.exports = router;

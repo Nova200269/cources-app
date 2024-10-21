@@ -11,18 +11,21 @@ const {
 const { admin, authentication } = require("../middlewares/authentication")
 
 router.use(authentication);
+
 router.route("/")
     .get(getAllCategories)
-router.route("/:id")
-    .get(getCategoryById)
 
 router.use(admin);
-router.route("/")
-    .delete(deleteAllCategories)
+
 router.route("/:id")
+    .get(getCategoryById)
     .put(updateCategory)
     .delete(deleteCategory)
+
 router.route("/add")
     .post(createCategory)
+
+router.route("/")
+    .delete(deleteAllCategories)
 
 module.exports = router

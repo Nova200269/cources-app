@@ -18,10 +18,14 @@ const {
 const { admin, teacher, authentication } = require("../middlewares/authentication");
 
 router.use(authentication);
-router.use(admin);
 
 router.route("/search")
     .get(searchCourse);
+router.route("/")
+    .get(getAllCourses)
+
+router.use(admin);
+
 router.route("/show-hide-course/:id")
     .put(showOrHideCourse);
 router.route("/course-revenue/:id")
@@ -41,8 +45,8 @@ router.route("/:id")
     .get(getCourseById)
     .put(updateCourse)
     .delete(deleteCourse);
+    
 router.route("/")
-    .get(getAllCourses)
     .delete(deleteAllCourses);
 
 module.exports = router;

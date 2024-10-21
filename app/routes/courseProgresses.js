@@ -11,17 +11,18 @@ const {
 const { admin, authentication } = require("../middlewares/authentication")
 
 router.use(authentication);
-
 router.use(admin);
-router.route("/")
-    .delete(deleteAllCourseProgresses)
-router.route("/:id")
-    .put(updateCourseProgress)
-    .delete(deleteCourseProgress)
-router.route("/add")
-    .post(createCourseProgress)
-router.route("/")
-    .get(getAllCourseProgresses)
+
 router.route("/:id")
     .get(getCourseProgressById)
+    .put(updateCourseProgress)
+    .delete(deleteCourseProgress)
+
+router.route("/add")
+    .post(createCourseProgress)
+    
+router.route("/")
+    .get(getAllCourseProgresses)
+    .delete(deleteAllCourseProgresses)
+
 module.exports = router
