@@ -58,6 +58,7 @@ const createComment = asyncHandler(
                 text: req.body.text,
                 rate: req.body.rate,
                 user: req.body.user,
+                course: req.body.course,
             }
         )
         const result = await comment.save()
@@ -82,6 +83,7 @@ const updateComment = asyncHandler(
                 text: req.body.text,
                 rate: req.body.rate,
                 user: req.body.user,
+                course: req.body.course,
             }
         }, { new: true })
         if (updatedComment) {

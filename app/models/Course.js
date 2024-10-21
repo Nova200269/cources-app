@@ -4,6 +4,7 @@ const JoiObjectId = require("joi-objectid")(joi);
 const { translate, translationArraySchema } = require("../models/Translate")
 const { CourseProgress } = require("../models/CourseProgress")
 const { PurchasedCourses } = require("../models/PurchasedCourses")
+const { Comment } = require("../models/Comment")
 
 const courseSchema = new mongoose.Schema({
     name: {
@@ -69,9 +70,10 @@ courseSchema.pre("findOneAndDelete", async function (next) {
         const id = this.getQuery()._id;
         const usedInCourseProgress = await CourseProgress.exists({ course: id });
         const usedInPurchasedCourses = await PurchasedCourses.exists({ courseId: id });
-        if (usedInCourseProgress || usedInPurchasedCourses) {
+        const usedInComment = await Comment.exists({ course: id });
+        if (usedInCourseProgress || usedInPurchasedCourses || usedInComment) {
             const error = new Error(
-                "Cannot delete course used in a Course progress or Purchased courses"
+                "Cannot delete course used in a Course progress, Purchased courses or Comment"
             );
             next(error);
         } else {

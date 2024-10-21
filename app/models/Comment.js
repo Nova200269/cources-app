@@ -16,7 +16,12 @@ const commentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
-    }
+    },
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: true
+    },
 }, { collection: "comment", timestamps: true });
 
 commentSchema.pre("findOneAndDelete", async function (next) {
@@ -39,9 +44,19 @@ commentSchema.pre("findOneAndDelete", async function (next) {
 commentSchema.pre("save", async function (next) {
     try {
         const { User } = require("../models/User");
+        const { Course } = require("../models/Course");
         const validUser = await User.findById(this.user);
+        const validCourse = await Course.findById(this.course);
         if (!validUser) {
             return next(new Error("Invalid User ID"));
+        }
+        if (!validCourse) {
+            return next(new Error("Invalid Course ID"));
+        }
+        const Comment = mongoose.model('Comment', commentSchema);
+        const commentExists = await Comment.findOne({ user: this.user, course: this.course })
+        if (commentExists) {
+            return next(new Error("user can't make two comments on the same course"));
         }
         next();
     } catch (err) {
@@ -56,6 +71,7 @@ function validateCreateComment(obj) {
         text: joi.string().required(),
         rate: joi.number().min(1).max(5).required(),
         user: JoiObjectId().required(),
+        course: JoiObjectId().required(),
     });
     return schema.validate(obj);
 }
@@ -65,6 +81,7 @@ function validateUpdateComment(obj) {
         text: joi.string(),
         rate: joi.number(),
         user: JoiObjectId(),
+        course: JoiObjectId(),
     });
     return schema.validate(obj);
 }
