@@ -16,11 +16,11 @@ const generateOtp = asyncHandler(async (req, res) => {
         status: "error",
         message: error.details[0].message
     });
-    const isEmail = await User.findOne({ email });
-    if (isEmail) return res.status(400).json({
-        status: "error",
-        message: 'this email already exists'
-    });
+    // const isEmail = await User.findOne({ email });
+    // if (isEmail) return res.status(400).json({
+    //     status: "error",
+    //     message: 'this email already exists'
+    // });
     let otp = await Otp.findOne({ email });
     if (otp && otp.expireDate > new Date()) {
         // If OTP exists and is still valid, check the number of attempts         
