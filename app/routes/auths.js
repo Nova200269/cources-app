@@ -24,14 +24,16 @@ router.post("/forget-password", forgetPassword);
 router.post("/login-admin", loginAdmin);
 
 router.use(authentication);
+
+router.route("/get-all-users")
+    .get(getAllUsersByRole);
+
 router.use(admin);
 
 router.route("/signup-teacher")
     .post(signupTeacher);
 router.route("/signup-admin")
     .post(signupAdmin);
-router.route("/get-all-users")
-    .get(getAllUsersByRole);
 router.route("/block-user/:id")
     .put(blockUserById)
 router.route("/delete-user/:id")
