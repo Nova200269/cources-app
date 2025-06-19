@@ -324,7 +324,7 @@ const getCourseRevenue = asyncHandler(async (req, res) => {
         status: 'error',
         message: "Course id is required"
     });
-    const purchases = await PurchasedCourse.find({ course: req.params.id });
+    const purchases = await PurchasedCourse.find({ courseId: req.params.id });
     const totalRevenue = purchases.reduce((sum, purchase) => sum + purchase.price, 0);
     const totalPurchases = purchases.length;
     const result = { totalRevenue: totalRevenue, totalPurchases: totalPurchases }
