@@ -20,14 +20,6 @@ const { admin, teacher, authentication } = require("../middlewares/authenticatio
 
 router.use(authentication);
 
-router.route("/search")
-    .get(searchCourse);
-router.route("/")
-    .get(getAllCourses)
-
-router.route("/:id")
-    .get(getCourseById)
-
 router.route("/new-courses")
     .get(newCourses);
 router.route("/on-sales-courses")
@@ -36,6 +28,15 @@ router.route("/popular-courses")
     .get(popularCourses);
 router.route("/purchased-courses")
     .get(getAllPurchasedCourses);
+
+router.route("/search")
+    .get(searchCourse);
+router.route("/")
+    .get(getAllCourses)
+
+router.route("/:id")
+    .get(getCourseById)
+
 
 router.use(admin);
 
