@@ -199,6 +199,7 @@ const createCourse = asyncHandler(
             introVideo: req.body.introVideo,
             comments: req.body.comments,
             category: req.body.category,
+            discount: req.body.discount,
         });
         const result = await course.save();
         res.status(201).json({
@@ -232,6 +233,7 @@ const updateCourse = asyncHandler(
                 introVideo: req.body.introVideo,
                 comments: req.body.comments,
                 category: req.body.category,
+                discount: req.body.discount,
             }
         }, { new: true })
         if (updatedCourse) {
