@@ -62,7 +62,11 @@ const courseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
         required: true,
-    }
+    },
+    discount: {
+        type: Number,
+        default: 0
+    },
 }, { collection: "course", timestamps: true });
 
 courseSchema.pre("findOneAndDelete", async function (next) {
@@ -140,6 +144,7 @@ function validateCreateCourse(obj) {
         introVideo: JoiObjectId().required(),
         comments: joi.array().items(JoiObjectId()),
         category: JoiObjectId().required(),
+        discount: joi.number(),
     });
     return schema.validate(obj);
 }
@@ -158,6 +163,7 @@ function validateUpdateCourse(obj) {
         introVideo: JoiObjectId(),
         comments: joi.array().items(JoiObjectId()),
         category: JoiObjectId(),
+        discount: joi.number(),
     });
     return schema.validate(obj);
 }

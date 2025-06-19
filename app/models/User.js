@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
         default: 'student'
     },
     phoneNumber: {
-        type: String,
+        type: Number,
     },
     FCMtoken: {
         type: String,
@@ -93,6 +93,7 @@ function validateRegisterStudent(obj) {
                 'string.pattern.base': 'Password must have at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
             }),
         image: joi.string().required(),
+        phoneNumber: joi.number(),
         otp: joi.string().required()
     });
     return schema.validate(obj);
@@ -114,6 +115,7 @@ function validateRegisterTeacher(obj) {
             lang: joi.string().required(),
             value: joi.string().required(),
         })).required(),
+        phoneNumber: joi.number(),
     });
     return schema.validate(obj);
 }
@@ -129,6 +131,7 @@ function validateRegisterAdmin(obj) {
             .messages({
                 'string.pattern.base': 'Password must have at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
             }),
+        phoneNumber: joi.number(),
     });
     return schema.validate(obj);
 }

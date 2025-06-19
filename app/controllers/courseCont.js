@@ -387,6 +387,25 @@ const popularCourses = asyncHandler(async (req, res) => {
     }
 });
 
+const onSaleCourses = asyncHandler(async (req, res) => {
+    const courses = await Course.find({ discount: { $gt: 0 } })
+        .sort({ createdAt: -1 })
+        .limit(6);
+
+    if (courses.length > 0) {
+        res.status(200).json({
+            status: 'success',
+            result: courses
+        });
+    } else {
+        res.status(404).json({
+            status: "error",
+            message: "No discounted courses found"
+        });
+    }
+});
+
+
 module.exports = {
     getAllCourses,
     getAllPurchasedCourses,
@@ -400,5 +419,6 @@ module.exports = {
     getCourseRevenue,
     getAllCoursesRevenue,
     newCourses,
-    popularCourses
+    popularCourses,
+    onSaleCourses
 }
