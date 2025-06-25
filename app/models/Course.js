@@ -38,12 +38,10 @@ const courseSchema = new mongoose.Schema({
     units: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Unit',
-        select: false
     }],
     quizzes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz',
-        select: false
     }],
     hidden: {
         type: Boolean,

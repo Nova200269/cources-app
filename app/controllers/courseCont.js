@@ -2,57 +2,35 @@ const asyncHandler = require("express-async-handler")
 const { Course, validateCreateCourse, validateUpdateCourse } = require("../models/Course")
 const { PurchasedCourse } = require("../models/PurchasedCourses")
 const { Language, getTranslation } = require("../models/Translate")
+const { User } = require("../models/User")
 
 const getAllCourses = asyncHandler(
     async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-        if (req.user.role === "admin") {
-            const courses = await Course.find()
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .select('+units +quizzes')
-                .populate('units')
-                .populate('quizzes')
-                .populate('introVideo')
-                .populate('comments')
-                .populate('category')
-            const count = await Course.countDocuments();
-            if (courses) {
-                res.status(200).json({
-                    status: 'success',
-                    count: count,
-                    result: courses,
-                });
-            } else {
-                res.status(404).json({
-                    status: "error",
-                    message: "Courses are not found"
-                })
-            }
+        const courses = await Course.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .select('+units +quizzes')
+            .populate('units')
+            .populate('quizzes')
+            .populate('introVideo')
+            .populate('comments')
+            .populate('category')
+        const count = await Course.countDocuments();
+        if (courses) {
+            res.status(200).json({
+                status: 'success',
+                count: count,
+                result: courses,
+            });
         } else {
-            const courses = await Course.find({ hidden: false })
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .populate('introVideo')
-                .populate('comments')
-                .populate('category')
-            const count = await Course.countDocuments();
-            if (courses) {
-                res.status(200).json({
-                    status: 'success',
-                    count: count,
-                    result: courses,
-                });
-            } else {
-                res.status(404).json({
-                    status: "error",
-                    message: "Courses are not found"
-                })
-            }
+            res.status(404).json({
+                status: "error",
+                message: "Courses are not found"
+            })
         }
     }
 )
@@ -118,34 +96,7 @@ const getCourseById = asyncHandler(
         const islang = await Language.find({ code: userLang })
         if (!islang) userLang = 'en'
         const hasPurchased = await PurchasedCourse.findOne({ userId, _id: req.params.id });
-        if (!hasPurchased || req.user.role !== "admin") {
-            const course = await Course.findById(req.params.id)
-                .populate('introVideo')
-                .populate('comments')
-                .populate('category')
-            if (!course || course.hidden) {
-                return res.status(404).json({
-                    status: 'error',
-                    message: 'Course not found'
-                });
-            }
-            const response = {
-                name: getTranslation(course.name, userLang),
-                description: getTranslation(course.description, userLang),
-                teacherName: getTranslation(course.teacherName, userLang),
-                image: course.image,
-                hours: course.hours,
-                price: course.price,
-                rate: course.rate,
-                units: course.units,
-                quizzes: course.quizzes,
-                introVideo: course.quizzes,
-            };
-            return res.status(200).json({
-                status: 'success',
-                result: response
-            });
-        }
+        const courseId = req.params.id
         const course = await Course.findById(courseId)
             .select('+units +quizzes')
             .populate('units')
@@ -208,7 +159,6 @@ const createCourse = asyncHandler(
         });
     }
 );
-
 
 const updateCourse = asyncHandler(
     async (req, res) => {
@@ -385,22 +335,41 @@ const getAllCoursesRevenue = asyncHandler(async (req, res) => {
 });
 
 const newCourses = asyncHandler(async (req, res) => {
-    const courses = await Course.find().sort({ createdAt: -1 }).limit(6);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const courses = await Course.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select('-units -quizzes -description -hours -hidden -introVideo -comments -category');
+
     if (courses.length > 0) {
+        const modifiedCourses = courses.map(course => {
+            const courseObj = course.toObject();
+            const discount = courseObj.discount || 0;
+            courseObj.priceAfterDiscount = courseObj.price - (courseObj.price * (discount));
+            return courseObj;
+        });
+
         res.status(200).json({
             status: 'success',
-            result: courses
+            result: modifiedCourses
         });
     } else {
         res.status(404).json({
             status: "error",
             message: "no Courses found"
-        })
+        });
     }
 });
 
 const popularCourses = asyncHandler(async (req, res) => {
-    const courses = await Course.find().sort({ rate: -1 }).limit(6);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const courses = await Course.find().sort({ rate: -1 }).skip(skip).limit(limit)
     if (courses.length > 0) {
         res.status(200).json({
             status: 'success',
@@ -415,10 +384,12 @@ const popularCourses = asyncHandler(async (req, res) => {
 });
 
 const onSaleCourses = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
     const courses = await Course.find({ discount: { $gt: 0 } })
         .sort({ createdAt: -1 })
-        .limit(6);
-
+        .skip(skip).limit(limit)
     if (courses.length > 0) {
         res.status(200).json({
             status: 'success',
@@ -431,7 +402,6 @@ const onSaleCourses = asyncHandler(async (req, res) => {
         });
     }
 });
-
 
 module.exports = {
     getAllCourses,
