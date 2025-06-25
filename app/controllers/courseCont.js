@@ -291,20 +291,45 @@ const showOrHideCourse = asyncHandler(async (req, res) => {
 });
 
 const searchCourse = asyncHandler(async (req, res) => {
-    const name = req.query.name;
-    if (!name) {
+    const { name, categoryId, price, rate } = req.query;
+
+    if (!name && !categoryId && !price && !rate) {
         return res.status(400).json({
             status: 'error',
-            message: 'Search query is required'
+            message: 'At least one search filter (name, categoryId, price, rate) is required'
         });
     }
-    const regex = new RegExp(name, 'i');
-    const courses = await Course.find({
-        $or: [
+
+    const filter = {};
+
+    if (name) {
+        const regex = new RegExp(name, 'i');
+        filter.$or = [
             { 'name.value': { $regex: regex } },
             { 'teacherName.value': { $regex: regex } }
-        ]
-    }).populate('introVideo');
+        ];
+    }
+
+    if (categoryId) {
+        filter.category = categoryId;
+    }
+
+    if (price) {
+        const priceValue = parseFloat(price);
+        if (!isNaN(priceValue)) {
+            filter.price = { $lte: priceValue };
+        }
+    }
+
+    if (rate) {
+        const rateValue = parseFloat(rate);
+        if (!isNaN(rateValue)) {
+            filter.rate = { $gte: rateValue };
+        }
+    }
+
+    const courses = await Course.find(filter).populate('introVideo');
+
     if (courses.length > 0) {
         return res.status(200).json({
             status: 'success',
