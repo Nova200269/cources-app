@@ -14,7 +14,6 @@ const quizSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Question',
         required: true,
-        select: false
     }]
 }, { collection: "quiz", timestamps: true });
 

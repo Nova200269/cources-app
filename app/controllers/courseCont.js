@@ -96,13 +96,24 @@ const getCourseById = asyncHandler(
         if (!islang) userLang = 'en'
         const hasPurchased = await PurchasedCourse.findOne({ userId, _id: req.params.id });
         const courseId = req.params.id
+
         const course = await Course.findById(courseId)
-            .select('+units +quizzes')
-            .populate('units')
-            .populate('quizzes')
+            .populate({
+                path: 'units',
+                populate: {
+                    path: 'lectures',
+                }
+            })
+            .populate({
+                path: 'quizzes',
+                populate: {
+                    path: 'questions',
+                }
+            })
             .populate('introVideo')
             .populate('comments')
-            .populate('category')
+            .populate('category');
+
         if (course) {
             res.status(200).json({
                 status: 'success',

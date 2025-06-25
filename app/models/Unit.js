@@ -14,7 +14,6 @@ const unitSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Lecture',
         required: true,
-        select: false
     }]
 }, { collection: "unit", timestamps: true });
 
