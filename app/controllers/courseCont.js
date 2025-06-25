@@ -2,7 +2,6 @@ const asyncHandler = require("express-async-handler")
 const { Course, validateCreateCourse, validateUpdateCourse } = require("../models/Course")
 const { PurchasedCourse } = require("../models/PurchasedCourses")
 const { Language, getTranslation } = require("../models/Translate")
-const { User } = require("../models/User")
 
 const getAllCourses = asyncHandler(
     async (req, res) => {
@@ -343,7 +342,8 @@ const newCourses = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .select('-units -quizzes -description -hours -hidden -introVideo -comments -category');
+        .select('-units -quizzes -description -hours -hidden -introVideo -comments -category')
+    // .populate('teacher', 'name image');
 
     if (courses.length > 0) {
         const modifiedCourses = courses.map(course => {
@@ -369,11 +369,22 @@ const popularCourses = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+
     const courses = await Course.find().sort({ rate: -1 }).skip(skip).limit(limit)
+        .select('-units -quizzes -description -hours -hidden -introVideo -comments -category')
+    // .populate('teacher', 'name image');
+
     if (courses.length > 0) {
+        const modifiedCourses = courses.map(course => {
+            const courseObj = course.toObject();
+            const discount = courseObj.discount || 0;
+            courseObj.priceAfterDiscount = courseObj.price - (courseObj.price * (discount));
+            return courseObj;
+        });
+
         res.status(200).json({
             status: 'success',
-            result: courses
+            result: modifiedCourses
         });
     } else {
         res.status(404).json({
@@ -387,13 +398,24 @@ const onSaleCourses = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+
     const courses = await Course.find({ discount: { $gt: 0 } })
         .sort({ createdAt: -1 })
         .skip(skip).limit(limit)
+        .select('-units -quizzes -description -hours -hidden -introVideo -comments -category')
+    // .populate('teacher', 'name image');
+
     if (courses.length > 0) {
+        const modifiedCourses = courses.map(course => {
+            const courseObj = course.toObject();
+            const discount = courseObj.discount || 0;
+            courseObj.priceAfterDiscount = courseObj.price - (courseObj.price * (discount));
+            return courseObj;
+        });
+
         res.status(200).json({
             status: 'success',
-            result: courses
+            result: modifiedCourses
         });
     } else {
         res.status(404).json({
