@@ -29,7 +29,7 @@ router.use(authentication);
 
 router.get('/teacher-by-id', getTeacherById);
 
-router.put('/edit-profile', editProfile);
+router.put('/edit-profile/:id', editProfile);
 
 router.route("/get-all-users")
     .get(getAllUsersByRole);
