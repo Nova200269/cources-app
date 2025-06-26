@@ -100,18 +100,37 @@ const getAllPurchasedCourses = asyncHandler(
                 message: 'Courses not found',
             });
         }
-        // Process and translate the courses for the user
-        const result = courses.map((course) => ({
-            name: getTranslation(course.name, userLang),
-            description: getTranslation(course.description, userLang),
-            teacherName: getTranslation(course.teacherName, userLang),
-            image: course.image,
-            hours: course.hours,
-            price: course.price,
-            units: course.units,
-            quizzes: course.quizzes,
-            introVideo: course.quizzes,
-        }));
+
+        const result = courses.map(course => {
+            let completedQuizzes = 0;
+            let totalQuizzes = 0;
+
+            course.units.forEach(unit => {
+                unit.lectures.forEach(lecture => {
+                    if (lecture.quiz) {
+                        totalQuizzes++;
+                        if (lecture.quiz.isComplete === true) {
+                            completedQuizzes++;
+                        }
+                    }
+                });
+            });
+
+            return {
+                name: getTranslation(course.name, userLang),
+                description: getTranslation(course.description, userLang),
+                teacherName: getTranslation(course.teacher?.name, userLang),
+                image: course.image,
+                hours: course.hours,
+                price: course.price,
+                units: course.units,
+                quizzes: course.quizzes,
+                introVideo: course.introVideo,
+                completedQuizzes,
+                totalQuizzes
+            };
+        });
+
         return res.status(200).json({
             status: 'success',
             count,

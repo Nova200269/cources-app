@@ -232,24 +232,53 @@ const getAllUsersByRole = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const role = req.query.role
-    const users = await User.find({ role: role })
+    const role = req.query.role;
+
+    const users = await User.find({ role })
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit);
-    const count = await User.countDocuments({ role: role });
-    if (users) {
-        res.status(200).json({
-            status: 'success',
-            count: count,
-            result: users,
-        });
-    } else {
-        res.status(404).json({
+        .limit(limit)
+        .lean();
+
+    const count = await User.countDocuments({ role });
+
+    if (!users || users.length === 0) {
+        return res.status(404).json({
             status: "error",
             message: "users not found"
-        })
+        });
     }
+
+    const modifiedUsers = users.map(user => {
+        if (user.role === "teacher") {
+            return {
+                ...user,
+                students: 156213,
+                numberOfCourses: 35,
+                experiences: [
+                    {
+                        image: "https://marketplace.canva.com/EAFlVDzb7sA/3/0/1600w/canva-white-gold-elegant-modern-certificate-of-participation-Qn4Rei141MM.jpg",
+                        title: "Senior Lecturer",
+                        year: "2020",
+                        description: "Taught advanced computer science topics"
+                    },
+                    {
+                        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAVaGwpRTpeuRkiV8n6LIAayiDcsY-vxDnXHEJMxc7O5WsNEIEfInIuFAW_3umpSBY20I&usqp=CAU",
+                        title: "Guest Speaker",
+                        year: "2022",
+                        description: "Presented workshops on AI and machine learning"
+                    }
+                ]
+            };
+        }
+        return user;
+    });
+
+    res.status(200).json({
+        status: 'success',
+        count,
+        result: modifiedUsers,
+    });
 });
 
 const blockUserById = asyncHandler(
@@ -350,6 +379,44 @@ const lastYearStudents = asyncHandler(
         }
     }
 )
+const editProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { name, email, phoneNumber } = req.body;
+
+        if (!name || !email || !phoneNumber) {
+            return res.status(400).json({
+                status: "error",
+                message: "name, email, and phoneNumber are required"
+            });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { name, email, phoneNumber },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({
+                status: "error",
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Profile updated successfully",
+            user: updatedUser
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: "error",
+            message: "Server error"
+        });
+    }
+};
 
 module.exports = {
     signupStudent,
@@ -364,5 +431,6 @@ module.exports = {
     deleteUserById,
     deleteUserToken,
     lastMounthStudents,
-    lastYearStudents
+    lastYearStudents,
+    editProfile
 };

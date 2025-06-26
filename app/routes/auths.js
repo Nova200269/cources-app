@@ -13,7 +13,8 @@ const {
     deleteUserById,
     deleteUserToken,
     lastMounthStudents,
-    lastYearStudents
+    lastYearStudents,
+    editProfile
 } = require("../controllers/authCont");
 const { authentication, admin, teacher } = require("../middlewares/authentication")
 
@@ -24,6 +25,8 @@ router.post("/forget-password", forgetPassword);
 router.post("/login-admin", loginAdmin);
 
 router.use(authentication);
+
+router.put('/edit-profile', editProfile);
 
 router.route("/get-all-users")
     .get(getAllUsersByRole);
