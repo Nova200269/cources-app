@@ -12,12 +12,28 @@ const getAllCourses = asyncHandler(
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .select('+units +quizzes')
-            .populate('units')
-            .populate('quizzes')
+            .populate({
+                path: 'units',
+                populate: {
+                    path: 'lectures',
+                    populate: {
+                        path: 'quiz',
+                        populate: {
+                            path: 'questions'
+                        }
+                    }
+                }
+            })
+            .populate({
+                path: 'final',
+                populate: {
+                    path: 'questions',
+                }
+            })
             .populate('introVideo')
+            .populate('teacher')
             .populate('comments')
-            .populate('category')
+            .populate('category');
         const count = await Course.countDocuments();
         if (courses) {
             res.status(200).json({
@@ -55,12 +71,28 @@ const getAllPurchasedCourses = asyncHandler(
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .select('+units +quizzes')
-            .populate('units')
-            .populate('quizzes')
+            .populate({
+                path: 'units',
+                populate: {
+                    path: 'lectures',
+                    populate: {
+                        path: 'quiz',
+                        populate: {
+                            path: 'questions'
+                        }
+                    }
+                }
+            })
+            .populate({
+                path: 'final',
+                populate: {
+                    path: 'questions',
+                }
+            })
             .populate('introVideo')
+            .populate('teacher')
             .populate('comments')
-            .populate('category')
+            .populate('category');
         const count = await Course.countDocuments({ _id: { $in: courseIds } });
         if (!courses || courses.length === 0) {
             return res.status(404).json({
