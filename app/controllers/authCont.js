@@ -109,6 +109,7 @@ const signupTeacher = asyncHandler(async (req, res) => {
         role: teacherRole,
         image: req.body.image,
         descreption: req.body.descreption,
+        job: req.body.job,
     });
     const token = user.generateAuthToken();
     const result = await user.save();

@@ -94,31 +94,91 @@ const getCourseById = asyncHandler(
         let userLang = req.query.lang || 'en';
         const islang = await Language.find({ code: userLang })
         if (!islang) userLang = 'en'
-        const hasPurchased = await PurchasedCourse.findOne({ userId, _id: req.params.id });
         const courseId = req.params.id
+        const hasPurchased = await PurchasedCourse.findOne({ userId, courseId });
 
         const course = await Course.findById(courseId)
             .populate({
                 path: 'units',
                 populate: {
                     path: 'lectures',
+                    populate: {
+                        path: 'quiz',
+                        populate: {
+                            path: 'questions'
+                        }
+                    }
                 }
             })
             .populate({
-                path: 'quizzes',
+                path: 'final',
                 populate: {
                     path: 'questions',
                 }
             })
             .populate('introVideo')
+            .populate('teacher')
             .populate('comments')
             .populate('category');
 
         if (course) {
+            const courseObj = course.toObject();
+
+            let numberOfLectures = 0;
+            if (Array.isArray(courseObj.units)) {
+                courseObj.units = courseObj.units.map(unit => {
+                    if (Array.isArray(unit.lectures)) {
+                        numberOfLectures += unit.lectures.length;
+                    }
+                    return {
+                        ...unit,
+                        duration: 15
+                    };
+                });
+            }
+
+            const numberOfComments = Array.isArray(courseObj.comments) ? courseObj.comments.length : 0;
+
+            const getTimeAgo = (createdAt) => {
+                const now = new Date();
+                const diff = now - new Date(createdAt);
+
+                const seconds = Math.floor(diff / 1000);
+                const minutes = Math.floor(diff / 60);
+                const hours = Math.floor(diff / (60 * 60));
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const months = Math.floor(days / 30);
+                const years = Math.floor(months / 12);
+
+                if (years > 0) return `${years} year${years > 1 ? 's' : ''} ago`;
+                if (months > 0) return `${months} month${months > 1 ? 's' : ''} ago`;
+                if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+                if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+                if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+                return `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+            };
+
+            if (Array.isArray(courseObj.comments)) {
+                courseObj.comments = courseObj.comments.map(comment => ({
+                    ...comment,
+                    writtenAt: getTimeAgo(comment.createdAt)
+                }));
+            }
+
+            const purchasedCourse = Boolean(hasPurchased);
+
             res.status(200).json({
                 status: 'success',
-                result: course
-            })
+                result: {
+                    ...courseObj,
+                    students: 156213,
+                    language: 'English',
+                    level: 'Beginner',
+                    numberOfLectures,
+                    numberOfComments,
+                    purchasedCourse
+                }
+            });
         } else {
             res.status(400).json({
                 status: 'error',
@@ -151,12 +211,12 @@ const createCourse = asyncHandler(
             name,
             description,
             image: req.body.image,
-            teacherName,
+            teacher: req.body.teacher,
             hours: req.body.hours,
             price: req.body.price,
             rate: req.body.rate,
             units: req.body.units,
-            quizzes: req.body.quizzes,
+            final: req.body.final,
             introVideo: req.body.introVideo,
             comments: req.body.comments,
             category: req.body.category,
@@ -184,12 +244,12 @@ const updateCourse = asyncHandler(
                 name: req.body.name,
                 description: req.body.description,
                 image: req.body.image,
-                teacherName: req.body.teacherName,
+                teacher: req.body.teacher,
                 hours: req.body.hours,
                 price: req.body.price,
                 rate: req.body.rate,
                 units: req.body.units,
-                quizzes: req.body.quizzes,
+                final: req.body.final,
                 introVideo: req.body.introVideo,
                 comments: req.body.comments,
                 category: req.body.category,
@@ -354,7 +414,7 @@ const newCourses = asyncHandler(async (req, res) => {
         .skip(skip)
         .limit(limit)
         .select('-units -quizzes -description -hours -hidden -introVideo -comments -category')
-    // .populate('teacher', 'name image');
+        .populate('teacher', 'name image');
 
     if (courses.length > 0) {
         const modifiedCourses = courses.map(course => {
@@ -383,7 +443,7 @@ const popularCourses = asyncHandler(async (req, res) => {
 
     const courses = await Course.find().sort({ rate: -1 }).skip(skip).limit(limit)
         .select('-units -quizzes -description -hours -hidden -introVideo -comments -category')
-    // .populate('teacher', 'name image');
+        .populate('teacher', 'name image');
 
     if (courses.length > 0) {
         const modifiedCourses = courses.map(course => {
@@ -414,7 +474,7 @@ const onSaleCourses = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip).limit(limit)
         .select('-units -quizzes -description -hours -hidden -introVideo -comments -category')
-    // .populate('teacher', 'name image');
+        .populate('teacher', 'name image');
 
     if (courses.length > 0) {
         const modifiedCourses = courses.map(course => {

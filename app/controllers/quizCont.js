@@ -58,6 +58,7 @@ const createQuiz = asyncHandler(
             {
                 name: req.body.name,
                 questions: req.body.questions,
+                isComplete: req.body.isComplete,
             }
         )
         const result = await quiz.save()
@@ -81,6 +82,7 @@ const updateQuiz = asyncHandler(
             $set: {
                 name: req.body.name,
                 questions: req.body.questions,
+                isComplete: req.body.isComplete,
             }
         }, { new: true })
         if (updatedQuiz) {

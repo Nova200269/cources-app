@@ -19,8 +19,9 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    teacherName: {
-        type: translate,
+    teacher: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     hours: {
@@ -39,10 +40,10 @@ const courseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Unit',
     }],
-    quizzes: [{
+    final: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz',
-    }],
+    },
     hidden: {
         type: Boolean,
         default: false
@@ -133,7 +134,7 @@ function validateCreateCourse(obj) {
         name: translationArraySchema.required(),
         description: translationArraySchema.required(),
         image: joi.string().required(),
-        teacherName: translationArraySchema.required(),
+        teacher: JoiObjectId().required(),
         hours: joi.number().required(),
         price: joi.number().required(),
         rate: joi.number().min(1).max(5),
@@ -152,7 +153,7 @@ function validateUpdateCourse(obj) {
         name: translationArraySchema,
         description: translationArraySchema,
         image: joi.string(),
-        teacherName: translationArraySchema,
+        teacher: JoiObjectId(),
         hours: joi.number(),
         price: joi.number(),
         rate: joi.number().min(1).max(5),

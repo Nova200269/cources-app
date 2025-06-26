@@ -57,6 +57,7 @@ const createLecture = asyncHandler(
                 title: req.body.title,
                 videoUrl: req.body.videoUrl,
                 duration: req.body.duration,
+                quiz: req.body.quiz,
             }
         )
         const result = await lecture.save()
@@ -81,6 +82,7 @@ const updateLecture = asyncHandler(
                 title: req.body.title,
                 videoUrl: req.body.videoUrl,
                 duration: req.body.duration,
+                quiz: req.body.quiz,
             }
         }, { new: true })
         if (updatedLecture) {

@@ -32,6 +32,9 @@ const userSchema = new mongoose.Schema({
     FCMtoken: {
         type: String,
     },
+    job: {
+        type: String,
+    },
     deviceToken: {
         type: String
     },
@@ -94,6 +97,7 @@ function validateRegisterStudent(obj) {
             }),
         image: joi.string().required(),
         phoneNumber: joi.number(),
+        job: joi.forbidden(),
         otp: joi.string().required()
     });
     return schema.validate(obj);
@@ -111,6 +115,7 @@ function validateRegisterTeacher(obj) {
                 'string.pattern.base': 'Password must have at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
             }),
         image: joi.string().required(),
+        job: joi.string().required(),
         descreption: joi.array().items(joi.object({
             lang: joi.string().required(),
             value: joi.string().required(),
@@ -132,6 +137,7 @@ function validateRegisterAdmin(obj) {
                 'string.pattern.base': 'Password must have at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
             }),
         phoneNumber: joi.number(),
+        job: joi.forbidden(),
     });
     return schema.validate(obj);
 }

@@ -17,6 +17,11 @@ const lectureSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    quiz: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Quiz',
+        required: true,
+    },
 }, { collection: "lecture", timestamps: true });
 
 lectureSchema.pre("findOneAndDelete", async function (next) {
@@ -44,6 +49,7 @@ function validateCreateLecture(obj) {
         title: translationArraySchema.required(),
         videoUrl: joi.string().uri().required(),
         duration: joi.number().required(),
+        quiz: JoiObjectId().required(),
     });
     return schema.validate(obj);
 }
@@ -53,6 +59,7 @@ function validateUpdateLecture(obj) {
         title: translationArraySchema,
         videoUrl: joi.string().uri(),
         duration: joi.number(),
+        quiz: JoiObjectId(),
     });
     return schema.validate(obj);
 }

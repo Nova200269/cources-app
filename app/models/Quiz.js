@@ -14,7 +14,11 @@ const quizSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Question',
         required: true,
-    }]
+    }],
+    isComplete: {
+        type: Boolean,
+        default: false
+    },
 }, { collection: "quiz", timestamps: true });
 
 quizSchema.pre("findOneAndDelete", async function (next) {
@@ -55,6 +59,7 @@ function validateCreateQuiz(obj) {
     const schema = joi.object({
         name: translationArraySchema.required(),
         questions: joi.array().items(JoiObjectId()).required(),
+        isComplete: joi.boolean()
     });
     return schema.validate(obj);
 }
@@ -63,6 +68,7 @@ function validateUpdateQuiz(obj) {
     const schema = joi.object({
         name: translationArraySchema,
         questions: joi.array().items(JoiObjectId()),
+        isComplete: joi.boolean()
     });
     return schema.validate(obj);
 }
