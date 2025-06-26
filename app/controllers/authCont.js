@@ -406,8 +406,7 @@ const editProfile = async (req, res) => {
 
         res.status(200).json({
             status: "success",
-            message: "Profile updated successfully",
-            user: updatedUser
+            result: updatedUser
         });
     } catch (err) {
         console.error(err);
@@ -417,6 +416,41 @@ const editProfile = async (req, res) => {
         });
     }
 };
+
+const getTeacherById = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id).lean();
+
+    if (!user) {
+        return res.status(404).json({
+            status: "error",
+            message: "User not found"
+        });
+    }
+
+    if (user.role === "teacher") {
+        user.students = 156213;
+        user.numberOfCourses = 35;
+        user.experiences = [
+            {
+                image: "https://marketplace.canva.com/EAFlVDzb7sA/3/0/1600w/canva-white-gold-elegant-modern-certificate-of-participation-Qn4Rei141MM.jpg",
+                title: "Senior Lecturer",
+                year: "2020",
+                description: "Taught advanced computer science topics"
+            },
+            {
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAVaGwpRTpeuRkiV8n6LIAayiDcsY-vxDnXHEJMxc7O5WsNEIEfInIuFAW_3umpSBY20I&usqp=CAU",
+                title: "Guest Speaker",
+                year: "2022",
+                description: "Presented workshops on AI and machine learning"
+            }
+        ];
+    }
+
+    res.status(200).json({
+        status: 'success',
+        result: user
+    });
+});
 
 module.exports = {
     signupStudent,
@@ -432,5 +466,6 @@ module.exports = {
     deleteUserToken,
     lastMounthStudents,
     lastYearStudents,
-    editProfile
+    editProfile,
+    getTeacherById
 };
