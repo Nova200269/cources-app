@@ -27,9 +27,9 @@ router.post("/login-admin", loginAdmin);
 
 router.use(authentication);
 
-router.get('/teacher-by-id', getTeacherById);
+router.get('/teacher-by-id/:id', getTeacherById);
 
-router.put('/edit-profile/:id', editProfile);
+router.put('/edit-profile', editProfile);
 
 router.route("/get-all-users")
     .get(getAllUsersByRole);
