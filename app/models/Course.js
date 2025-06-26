@@ -92,19 +92,12 @@ courseSchema.pre("save", async function (next) {
         const { Lecture } = require("../models/Lecture");
         const { Category } = require("../models/Category");
         const { Unit } = require("../models/Unit");
-        const { Quiz } = require("../models/Quiz");
         const { Comment } = require("../models/Comment");
 
         const units = this.units
         const validUnits = await Unit.find({ _id: { $in: units } });
         if (validUnits.length !== units.length) {
             return next(new Error("One or more Unit IDs are invalid"));
-        }
-
-        const quizzes = this.quizzes
-        const validQuizzes = await Quiz.find({ _id: { $in: quizzes } });
-        if (validQuizzes.length !== quizzes.length) {
-            return next(new Error("One or more Quiz IDs are invalid"));
         }
 
         const comments = this.comments
