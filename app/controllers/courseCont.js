@@ -197,8 +197,8 @@ const createCourse = asyncHandler(
                 message: error.details[0].message,
             });
         }
-        const { name, description, teacherName } = req.body;
-        const translations = [name, description, teacherName];
+        const { name, description } = req.body;
+        const translations = [name, description];
         for (const field of translations) {
             for (const translation of field) {
                 const existingLang = await Language.findOne({ code: translation.lang });
