@@ -362,12 +362,12 @@ const showOrHideCourse = asyncHandler(async (req, res) => {
 });
 
 const searchCourse = asyncHandler(async (req, res) => {
-    const { name, categoryId, price, rate } = req.query;
+    const { name, teacherId, categoryId, price, rate } = req.query;
 
-    if (!name && !categoryId && !price && !rate) {
+    if (!name && !categoryId && !price && !rate && !teacherId) {
         return res.status(400).json({
             status: 'error',
-            message: 'At least one search filter (name, categoryId, price, rate) is required'
+            message: 'At least one search filter (name, categoryId, price, rate, teacherId) is required'
         });
     }
 
@@ -376,13 +376,16 @@ const searchCourse = asyncHandler(async (req, res) => {
     if (name) {
         const regex = new RegExp(name, 'i');
         filter.$or = [
-            { 'name.value': { $regex: regex } },
-            { 'teacherName.value': { $regex: regex } }
+            { 'name.value': { $regex: regex } }
         ];
     }
 
     if (categoryId) {
         filter.category = categoryId;
+    }
+
+    if (teacherId) {
+        filter.teacher = teacherId;
     }
 
     if (price) {
