@@ -32,7 +32,13 @@ const getAllCourses = asyncHandler(
             })
             .populate('introVideo')
             .populate('teacher')
-            .populate('comments')
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'user',
+                    select: 'name image role phoneNumber email'
+                }
+            })
             .populate('category');
         const count = await Course.countDocuments();
         if (courses) {
@@ -91,7 +97,13 @@ const getAllPurchasedCourses = asyncHandler(
             })
             .populate('introVideo')
             .populate('teacher')
-            .populate('comments')
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'user',
+                    select: 'name image role phoneNumber email'
+                }
+            })
             .populate('category');
         const count = await Course.countDocuments({ _id: { $in: courseIds } });
         if (!courses || courses.length === 0) {
@@ -169,7 +181,13 @@ const getCourseById = asyncHandler(
             })
             .populate('introVideo')
             .populate('teacher')
-            .populate('comments')
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'user',
+                    select: 'name image role phoneNumber email'
+                }
+            })
             .populate('category');
 
         if (course) {
@@ -423,7 +441,13 @@ const searchCourse = asyncHandler(async (req, res) => {
         })
         .populate('introVideo')
         .populate('teacher')
-        .populate('comments')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'user',
+                select: 'name image role phoneNumber email'
+            }
+        })
         .populate('category');
 
     courses = courses.map(course => {
