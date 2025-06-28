@@ -420,7 +420,7 @@ const searchCourse = asyncHandler(async (req, res) => {
         }
     }
 
-    const courses = await Course.find(filter)
+    let courses = await Course.find(filter)
         .populate({
             path: 'units',
             populate: {
