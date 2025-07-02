@@ -4,6 +4,7 @@ const { Otp, validateCreateOtp } = require("../models/Otp")
 const { generateOtpCode } = require("../utils/functions")
 const { sendOtpEmail } = require('../utils/sendEmail')
 const asyncHandler = require('express-async-handler');
+const { Course } = require("../models/Course")
 
 const generateOtp = asyncHandler(async (req, res) => {
     const { email } = req.body;
@@ -445,10 +446,65 @@ const getTeacherById = asyncHandler(async (req, res) => {
             }
         ];
     }
-
+    const filter = {};
+    filter.teacher = user._id;
+    let courses = await Course.find(filter)
+        .populate({
+            path: 'units',
+            populate: {
+                path: 'lectures',
+                populate: {
+                    path: 'quiz',
+                    populate: {
+                        path: 'questions'
+                    }
+                }
+            }
+        })
+        .populate({
+            path: 'final',
+            populate: {
+                path: 'questions',
+            }
+        })
+        .populate('introVideo')
+        .populate('teacher')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'user',
+                select: 'name image role phoneNumber email'
+            }
+        })
+    courses = courses.map(course => {
+        const teacher = course.teacher;
+        if (teacher?.role === "teacher") {
+            course.teacher = {
+                ...teacher.toObject(),
+                students: 156213,
+                numberOfCourses: 35,
+                experiences: [
+                    {
+                        image: "https://marketplace.canva.com/EAFlVDzb7sA/3/0/1600w/canva-white-gold-elegant-modern-certificate-of-participation-Qn4Rei141MM.jpg",
+                        title: "Senior Lecturer",
+                        year: "2020",
+                        description: "Taught advanced computer science topics"
+                    },
+                    {
+                        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAVaGwpRTpeuRkiV8n6LIAayiDcsY-vxDnXHEJMxc7O5WsNEIEfInIuFAW_3umpSBY20I&usqp=CAU",
+                        title: "Guest Speaker",
+                        year: "2022",
+                        description: "Presented workshops on AI and machine learning"
+                    }
+                ]
+            };
+        }
+        return course;
+    });
     res.status(200).json({
         status: 'success',
-        result: user
+        result: user,
+        courses
     });
 });
 
