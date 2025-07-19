@@ -24,7 +24,12 @@ function startApp() {
 }
 
 function initMiddleware() {
-  app.use(cors());
+  app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  }));
   app.use(helmet());
   app.use(express.json({ limit: "150kb" }));
 
